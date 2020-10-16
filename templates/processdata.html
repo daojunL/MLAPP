@@ -1,4 +1,4 @@
-<!doctype html>
+{% load static %}
 <html lang="en-US">
 
 <head>
@@ -27,38 +27,8 @@
 </head>
 
 <body>
-  <!-- Main Container -->
-  <div class="container">
-    <!-- header section -->
-    <div class="hero">
-      <h2 class="h1_text">MLAPP</h2>
-    </div>
 
-    <!-- body -->
-    <div class="mlapp">
-
-      <div class="container_body">
-        <div class="form-group">
-        <label for="exampleInputEmail1" class="container_h3_text">Experiment Name </label>
-        <input class="form-control" type="text" placeholder="Experiment Name">
-      </div>
-        <form>
-          <div class="form-group">
-            <label for="exampleFormControlFile1" class="container_h3_text">Choose Your Dataset</label>
-            <input type="file" class="form-control-file" id="exampleFormControlFile1">
-          </div>
-        </form>
-      </div>
-
-      <div class="container_h4_text">
-        <h4><a href="nextpage.html">NEXT STEP</a></h4>
-      </div>
-    </div>
-
-
-
-  </div>
-
+{{ content.name }}
 </body>
 
 </html>

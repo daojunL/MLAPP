@@ -3,18 +3,15 @@ from tkinter import ttk
 import tkinter.font as tkfont
 
 import pandas as pd
-import numpy as np
-
 from sklearn.model_selection import train_test_split
 from sklearn.linear_model import LinearRegression
 from sklearn.tree import DecisionTreeRegressor
 from sklearn import svm
 
-#  the model we build only solves regression problems
 class Step4:
     def __init__(self, root, data_set, project_title, previous_frame):
         self.__root = root
-        self.__root.geometry('1000x500')
+        self.__root.geometry('1000x550')
         self.__label_font = tkfont.Font(family="Times New Roman", size=12)
         self.__button_font = tkfont.Font(family="Times New Roman", size=10)
         self.__title_font = tkfont.Font(family="Times New Roman", size=14)
@@ -90,6 +87,7 @@ class Step4:
         num_variables = len(column_names)
         self.__check_button_control_list = []
         check_button_list = []
+
         for i in range(num_variables):
             control_variable = IntVar()
             control_variable.set(0)
@@ -102,11 +100,10 @@ class Step4:
         select_features_label = Label(self.__canvas_frame, text='Select features: ', font=self.__label_font)
         select_features_label.pack(side=LEFT, padx=5, pady=2)
 
-
         for i in range(num_variables):
-            data_type = self.__data_set.dtypes[i]
-            if data_type == "int64" or data_type == "float64":
-                check_button_list[i].pack(side=LEFT, padx=5, pady=2)
+            # data_type = self.__data_set.dtypes[i]
+            # if data_type == "int64" or data_type == "float64":
+            check_button_list[i].pack(side=LEFT, padx=5, pady=2)
 
         select_y_label = Label(self.__canvas_frame2, text='Select label: ', font=self.__label_font)
         select_y_label.pack(side=LEFT, padx=5, pady=2)
@@ -151,7 +148,6 @@ class Step4:
                                     command=self.confirm_model)
         submit_button.grid(row=3, column=5)
 
-
         # Navigation buttons
         self.__next_button = Button(self.__step4_frame, text='Next step', font=self.__button_font, width=14,
                                     command=self.unpack_frame_forward)
@@ -169,93 +165,55 @@ class Step4:
     def confirm_model(self):
         try:
             self.__subframe2.pack_forget()
-            self.__subframe2 = Frame(self.__wrapper2)
-            self.__subframe2.pack(fill='x', expand='no', padx=20, pady=5)
-            model_var = int(self.__control_model_var.get())  # get which model
-            ratio_var = int(self.__control_ratio_var.get())  # get train/test ratio
-            label_var = int(self.__control_label_var.get())  # get the label variable
-            colnames = self.__data_set.columns.values.tolist()
-            features = []
-            for i in range(len(self.__check_button_control_list)):
-                if int(self.__check_button_control_list[i].get()) == 1:
-                    features.append(colnames[i])
-
-            x = self.__data_set.loc[:, features]
-            y = self.__data_set.loc[:, colnames[label_var - 1]]
-            test_size = 1 / (1 + ratio_var)
-            x_train, x_test, y_train, y_test = train_test_split(x, y, test_size=test_size, random_state=123)
-            self.__x_train = x_train
-            self.__x_test = x_test
-            self.__y_train = y_train
-            self.__y_test = y_test
-            if model_var == 1:  # linear regression model
-                lr_model = LinearRegression()
-                lr_model.fit(self.__x_train, self.__y_train)
-                self.__model = lr_model
-                success_message = Label(self.__subframe2, text="Model has been successfully set up ",
-                                        font=self.__label_font)
-                success_message.pack(side=BOTTOM)
-
-            elif model_var == 2:  # Decision Tree Model
-                max_depth_label = Label(self.__subframe2, text="Enter the maximum depth", font=self.__label_font)
-                max_depth_label.pack(side=LEFT, padx=5, pady=2)
-                self.__max_depth_entry = Entry(self.__subframe2, width=30)
-                self.__max_depth_entry.pack(side=LEFT, padx=5, pady=2)
-                confirm_button = Button(self.__subframe2, text='confirm', font=self.__button_font, width=14,
-                                        command=self.confirm_tree_model)
-                confirm_button.pack(side=LEFT, padx=5, pady=2)
-
-            elif model_var == 3:  # svm model
-                svm_model = svm.SVR()
-                svm_model.fit(self.__x_train, self.__y_train)
-                self.__model = svm_model
-                success_message = Label(self.__subframe2, text="Model has been successfully set up ",
-                                        font=self.__label_font)
-                success_message.pack(side=BOTTOM)
-
         except:
-            self.__subframe2 = Frame(self.__wrapper2)
-            self.__subframe2.pack(fill='x', expand='no', padx=20, pady=5)
-            model_var = int(self.__control_model_var.get()) # get which model
-            ratio_var = int(self.__control_ratio_var.get()) # get train/test ratio
-            label_var = int(self.__control_label_var.get()) # get the label variable
-            colnames = self.__data_set.columns.values.tolist()
-            features = []
-            for i in range(len(self.__check_button_control_list)):
-                if int(self.__check_button_control_list[i].get()) == 1:
-                    features.append(colnames[i])
+            print()
+        self.__subframe2 = Frame(self.__wrapper2)
+        self.__subframe2.pack(fill='x', expand='no', padx=20, pady=5)
+        model_var = int(self.__control_model_var.get())  # get which model
+        ratio_var = int(self.__control_ratio_var.get())  # get train/test ratio
+        label_var = int(self.__control_label_var.get())  # get the label variable
+        colnames = self.__data_set.columns.values.tolist()
+        features = []
+        for i in range(len(self.__check_button_control_list)):
+            if int(self.__check_button_control_list[i].get()) == 1:
+                features.append(colnames[i])
 
-            x = self.__data_set.loc[:, features]
-            y = self.__data_set.loc[:, colnames[label_var - 1]]
-            test_size = 1 / (1+ratio_var)
-            x_train, x_test, y_train, y_test = train_test_split(x, y, test_size=test_size, random_state=123)
-            self.__x_train = x_train
-            self.__x_test = x_test
-            self.__y_train = y_train
-            self.__y_test = y_test
-            if model_var == 1: # linear regression model
-                lr_model = LinearRegression()
-                lr_model.fit(self.__x_train, self.__y_train)
-                self.__model = lr_model
-                success_message = Label(self.__subframe2, text="Model has been successfully set up ",
-                                        font=self.__label_font)
-                success_message.pack(side=BOTTOM)
-            elif model_var == 2:  # Decision Tree Model
-                max_depth_label = Label(self.__subframe2, text="Enter the maximum depth", font=self.__label_font)
-                max_depth_label.pack(side=LEFT, padx=5, pady=2)
-                self.__max_depth_entry = Entry(self.__subframe2, width=30)
-                self.__max_depth_entry.pack(side=LEFT, padx=5, pady=2)
-                confirm_button = Button(self.__subframe2, text='confirm', font=self.__button_font, width=14,
-                                       command=self.confirm_tree_model)
-                confirm_button.pack(side=LEFT, padx=5, pady=2)
+        x = self.__data_set.loc[:, features]
+        for i in range(len(features)):
+            feature_data_type = x.dtypes[i]
+            if feature_data_type != "int64" and feature_data_type != "float64":
+                x[features[i]] = pd.factorize(x[features[i]])[0]
 
-            elif model_var == 3: # svm model
-                svm_model = svm.SVR()
-                svm_model.fit(self.__x_train, self.__y_train)
-                self.__model = svm_model
-                success_message = Label(self.__subframe2, text="Model has been successfully set up ",
-                                        font=self.__label_font)
-                success_message.pack(side=BOTTOM)
+        y = self.__data_set.loc[:, colnames[label_var - 1]]
+        test_size = 1 / (1 + ratio_var)
+        x_train, x_test, y_train, y_test = train_test_split(x, y, test_size=test_size, random_state=123)
+        self.__x_train = x_train
+        self.__x_test = x_test
+        self.__y_train = y_train
+        self.__y_test = y_test
+        if model_var == 1:  # linear regression model
+            lr_model = LinearRegression()
+            lr_model.fit(self.__x_train, self.__y_train)
+            self.__model = lr_model
+            success_message = Label(self.__subframe2, text="Model has been successfully set up ",
+                                    font=self.__label_font)
+            success_message.pack(side=BOTTOM)
+        elif model_var == 2:  # Decision Tree Model
+            max_depth_label = Label(self.__subframe2, text="Enter the maximum depth", font=self.__label_font)
+            max_depth_label.pack(side=LEFT, padx=5, pady=2)
+            self.__max_depth_entry = Entry(self.__subframe2, width=30)
+            self.__max_depth_entry.pack(side=LEFT, padx=5, pady=2)
+            confirm_button = Button(self.__subframe2, text='confirm', font=self.__button_font, width=14,
+                                    command=self.confirm_tree_model)
+            confirm_button.pack(side=LEFT, padx=5, pady=2)
+
+        elif model_var == 3:  # svm model
+            svm_model = svm.SVR()
+            svm_model.fit(self.__x_train, self.__y_train)
+            self.__model = svm_model
+            success_message = Label(self.__subframe2, text="Model has been successfully set up ",
+                                    font=self.__label_font)
+            success_message.pack(side=BOTTOM)
 
     def confirm_tree_model(self):
         max_depth = self.__max_depth_entry.get()
@@ -270,11 +228,10 @@ class Step4:
 
     def unpack_frame_forward(self):
         self.__step4_frame.pack_forget()
-        # Step5(self.__root, self.__model, self.__project_title, self.__step4_frame, self.__test_x, self.__test_y).pack_frame()
 
     def unpack_frame_previous(self):
         self.__step4_frame.pack_forget()
-        self.__root.geometry('1200x793')
+        self.__root.geometry('1200x793') # MAYBE NEEDED TO BE CHANGED
         self.__previous_frame.pack(fill='both')
 
 

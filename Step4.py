@@ -101,8 +101,6 @@ class Step4:
         select_features_label.pack(side=LEFT, padx=5, pady=2)
 
         for i in range(num_variables):
-            # data_type = self.__data_set.dtypes[i]
-            # if data_type == "int64" or data_type == "float64":
             check_button_list[i].pack(side=LEFT, padx=5, pady=2)
 
         select_y_label = Label(self.__canvas_frame2, text='Select label: ', font=self.__label_font)
@@ -129,8 +127,8 @@ class Step4:
         ratio_radio_button1.grid(row=2, column=1)
         ratio_radio_button2.grid(row=2, column=2)
         ratio_radio_button3.grid(row=2, column=3, padx = 50)
-        ratio_radio_button4.grid(row=2, column=4, padx = 50)
-        ratio_radio_button5.grid(row=2, column=5)
+        ratio_radio_button4.grid(row=2, column=4, padx = 60)
+        ratio_radio_button5.grid(row=2, column=5, padx = 40)
 
         select_model_label = Label(self.__sub_subframe2, text='Select model: ', font=self.__label_font)
         select_model_label.grid(row=3, column=0, sticky=W, pady=1)
@@ -141,7 +139,7 @@ class Step4:
         model_radio_button2 = Radiobutton(self.__sub_subframe2, value=2, variable=self.__control_model_var, text=model[1])
         model_radio_button3 = Radiobutton(self.__sub_subframe2, value=3, variable=self.__control_model_var, text=model[2])
         model_radio_button1.grid(row=3, column=1)
-        model_radio_button2.grid(row=3, column=2)
+        model_radio_button2.grid(row=3, column=2, padx = 40)
         model_radio_button3.grid(row=3, column=3)
 
         submit_button = Button(self.__sub_subframe2, text='Confirm Model', font=self.__button_font, width=14,
@@ -166,9 +164,9 @@ class Step4:
         try:
             self.__subframe2.pack_forget()
         except:
-            print()
+            pass
         self.__subframe2 = Frame(self.__wrapper2)
-        self.__subframe2.pack(fill='x', expand='no', padx=20, pady=5)
+        self.__subframe2.pack(fill='x', expand='no', padx=10, pady=5)
         model_var = int(self.__control_model_var.get())  # get which model
         ratio_var = int(self.__control_ratio_var.get())  # get train/test ratio
         label_var = int(self.__control_label_var.get())  # get the label variable
@@ -200,7 +198,7 @@ class Step4:
             success_message.pack(side=BOTTOM)
         elif model_var == 2:  # Decision Tree Model
             max_depth_label = Label(self.__subframe2, text="Enter the maximum depth", font=self.__label_font)
-            max_depth_label.pack(side=LEFT, padx=5, pady=2)
+            max_depth_label.pack(side=LEFT, padx=10, pady=2)
             self.__max_depth_entry = Entry(self.__subframe2, width=30)
             self.__max_depth_entry.pack(side=LEFT, padx=5, pady=2)
             confirm_button = Button(self.__subframe2, text='confirm', font=self.__button_font, width=14,
@@ -217,11 +215,22 @@ class Step4:
 
     def confirm_tree_model(self):
         max_depth = self.__max_depth_entry.get()
-        tree_model = DecisionTreeRegressor(max_depth=int(max_depth))
-        tree_model.fit(self.__x_train, self.__y_train)
-        self.__model = tree_model
-        success_message = Label(self.__subframe2, text="Model has been successfully set up ",font=self.__label_font)
-        success_message.pack(side=BOTTOM)
+        try:
+            self.__tree_entry_frame.pack_forget()
+        except:
+            pass
+        self.__tree_entry_frame = Frame(self.__subframe2)
+        self.__tree_entry_frame.pack(fill = "x", expand="no", padx=5, pady=2)
+        try:
+            depth = int(max_depth)
+            tree_model = DecisionTreeRegressor(max_depth=depth)
+            tree_model.fit(self.__x_train, self.__y_train)
+            self.__model = tree_model
+            success_message = Label(self.__tree_entry_frame, text="Model has been successfully set up ",font=self.__label_font)
+            success_message.pack(side=BOTTOM)
+        except:
+            error_message = Label(self.__tree_entry_frame, text="Please enter a valid number (Must be an integer)", font=self.__label_font)
+            error_message.pack(side=BOTTOM)
 
     def pack_frame(self):
         self.__step4_frame.pack(fill='both')

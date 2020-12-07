@@ -5,12 +5,15 @@ from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 import pandas as pd
 from sklearn.metrics import mean_squared_error
 import matplotlib.pyplot as plt
+from sklearn.metrics import r2_score
+from sklearn.metrics import explained_variance_score
+import Step1
 
 
 class ModelSummary:
     def __init__(self, root, x_test, y_test, model, project_title, previous_frame):
         self.__root = root
-        self.__root.geometry('1000x550')
+        self.__root.geometry('1000x1000')
         self.__label_font = tkfont.Font(family="Times New Roman", size=12)
         self.__button_font = tkfont.Font(family="Times New Roman", size=10)
         self.__title_font = tkfont.Font(family="Times New Roman", size=14)
@@ -25,8 +28,19 @@ class ModelSummary:
 
         # First section of the page
         self.__wrapper1 = LabelFrame(self.__ModelSummary_frame, text='Step 5: Model Summary', font=self.__title_font)
-        project_name_label = Label(self.__wrapper1, text="The project name is " + self.__project_title, font=self.__label_font)
-        model_name  = ""
+
+        self.__wrapper1.columnconfigure(0, weight=1)
+        self.__wrapper1.columnconfigure(1, weight=1)
+
+        self.__wrapper1_left = Frame(self.__wrapper1)
+        self.__wrapper1_right = Frame(self.__wrapper1)
+
+        self.__wrapper1_left.grid(row=0, column=0, sticky=N + S + W + E)
+        self.__wrapper1_right.grid(row=0, column=1, sticky=N + S + W + E)
+
+        project_name_label = Label(self.__wrapper1_left, text="The project name is " + self.__project_title,
+                                   font=self.__label_font)
+        model_name = ""
         if type(self.__model).__name__ == "LinearRegression":
             model_name = "Linear Regression"
         elif type(self.__model).__name__ == "DecisionTreeRegressor":
@@ -34,29 +48,42 @@ class ModelSummary:
         elif type(self.__model).__name__ == "SVR":
             model_name = "SVM"
 
-        model_name_label = Label(self.__wrapper1, text="The model name is " + model_name, font=self.__label_font)
+        model_name_label = Label(self.__wrapper1_left, text="The model we use is " + model_name, font=self.__label_font)
 
         features_list = self.__x_test.columns.values.tolist()
         features_str = ", "
         features_str = features_str.join(features_list)
-        features_label = Label(self.__wrapper1, text="We have these features:  " + features_str, font=self.__label_font)
+        features_label = Label(self.__wrapper1_left, text="We have these features:  " + features_str,
+                               font=self.__label_font)
 
-        y_label = Label(self.__wrapper1, text="The label (y) we use is " + self.__y_test.name, font=self.__label_font)
+        y_label = Label(self.__wrapper1_left, text="The label (y) we use is " + self.__y_test.name,
+                        font=self.__label_font)
 
         y_pred = self.__model.predict(self.__x_test)
         y_true = self.__y_test
-        mse = mean_squared_error(y_true, y_pred, squared=False)
-        mse_label = Label(self.__wrapper1, text="The mean square error (MSE) is " + str(mse), font=self.__label_font)
+        mse = round(mean_squared_error(y_true, y_pred, squared=False),4)
+        mse_label = Label(self.__wrapper1_left, text="The mean square error (MSE) is " + str(mse),
+                          font=self.__label_font)
+        r_square = round(r2_score(y_true, y_pred),4)
+        r2_label = Label(self.__wrapper1_left, text="The r square value (R^2) is " + str(r_square),
+                          font=self.__label_font)
+        exp_var_score = round(explained_variance_score(y_true, y_pred),4)
+        exp_var_score_label = Label(self.__wrapper1_left, text="The explained variance socre is " + str(exp_var_score),
+                          font=self.__label_font)
 
         project_name_label.pack(fill="x")
-        model_name_label.pack(fill="x")
         features_label.pack(fill="x")
         y_label.pack(fill="x")
+        model_name_label.pack(fill="x")
         mse_label.pack(fill="x")
+        r2_label.pack(fill="x")
+        exp_var_score_label.pack(fill="x")
 
         # second section
-        self.__wrapper2 = LabelFrame(self.__ModelSummary_frame, text='Table of real value of y and predicted value of y: ', font=self.__title_font)
-        df = pd.DataFrame({'Real Values': self.__y_test, 'Predicted Values': y_pred})
+        self.__wrapper2 = LabelFrame(self.__ModelSummary_frame,
+                                     text='Table of real value of y and predicted value of y: ', font=self.__title_font)
+        df = pd.DataFrame(
+            {'Real Values': y_true, 'Predicted Values': y_pred, 'Residues (pred y - real y)': y_true - y_pred})
         columns, col_width = list(df.columns), []
         for col in columns:
             width = df.head()[col].astype('str').str.len().max()
@@ -65,7 +92,7 @@ class ModelSummary:
             else:
                 col_width.append(len(str(col)) * 6 + 25)
 
-        self.__data_table = ttk.Treeview(self.__wrapper2, columns=tuple(columns), show="headings", height=7)
+        self.__data_table = ttk.Treeview(self.__wrapper1_right, columns=tuple(columns), show="headings", height=7)
 
         rows = df.values
         for row in rows:
@@ -75,7 +102,7 @@ class ModelSummary:
             self.__data_table.heading(i, text=col, anchor=W)
             self.__data_table.column(col, width=col_width[i], stretch=NO, anchor=W)
 
-        hsb2 = ttk.Scrollbar(self.__wrapper2, orient="horizontal", command=self.__data_table.xview)
+        hsb2 = ttk.Scrollbar(self.__wrapper1_right, orient="horizontal", command=self.__data_table.xview)
         self.__data_table.configure(xscrollcommand=hsb2.set)
 
         hsb2.pack(side=BOTTOM, fill='x', padx=5, pady=5)
@@ -103,13 +130,15 @@ class ModelSummary:
         self.__pred_frame.pack(side=TOP, anchor=W)
 
         # Packing four tables of the wrapper3
-        self.__pred_y_scaplot.grid(row=0, column=0, sticky=N+S+W+E)
+        self.__pred_y_scaplot.grid(row=0, column=0, sticky=N + S + W + E)
 
         ##### --- TO DO: Add other plots ---- ###
         #########################################
 
-        self.__next_button = Button(self.__ModelSummary_frame, text='Go back to step1', font=self.__button_font, width=14, command=self.unpack_frame_forward)
-        self.__previous_button = Button(self.__ModelSummary_frame, text='Previous step', font=self.__button_font, width=14, command=self.unpack_frame_previous)
+        self.__next_button = Button(self.__ModelSummary_frame, text='Go back to step1', font=self.__button_font,
+                                    width=14, command=self.unpack_frame_forward)
+        self.__previous_button = Button(self.__ModelSummary_frame, text='Previous step', font=self.__button_font,
+                                        width=14, command=self.unpack_frame_previous)
 
         self.__wrapper1.pack(fill='x', expand='no', padx=10, pady=2)
         self.__wrapper2.pack(fill='x', expand='no', padx=10, pady=2)
@@ -117,19 +146,15 @@ class ModelSummary:
         self.__previous_button.pack(side=LEFT, padx=10, pady=5)
         self.__next_button.pack(side=RIGHT, padx=10, pady=5)
 
-
     def pack_frame(self):
         self.__ModelSummary_frame.pack(fill='both')
 
     def unpack_frame_forward(self):
-        # go back to the step 1
-        pass
-        # self.__step4_frame.pack_forget()
-        # ModelSummary(self.__root, self.__data_set, self.__project_title, self.__step4_frame).pack_frame()
-
-
-
+        self.__ModelSummary_frame.pack_forget()
+        step1 = Step1.Step1(self.__root)
+        step1.pack_frame()
+    
     def unpack_frame_previous(self):
         self.__ModelSummary_frame.pack_forget()
-        self.__root.geometry('1000x550') # MAYBE NEEDED TO BE CHANGED
+        self.__root.geometry('1000x550')  # MAYBE NEEDED TO BE CHANGED
         self.__previous_frame.pack(fill='both')

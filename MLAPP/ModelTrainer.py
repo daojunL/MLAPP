@@ -27,7 +27,7 @@ class ModelTrainer:
         project_title_label = Label(self.__step4_frame, text="Project name: " + self.__project_title,
                                     font=tkfont.Font(family="Times New Roman", size=16))
 
-        # First section of the page
+        # First section of the page, showing the first five rows 
         self.__wrapper1 = LabelFrame(self.__step4_frame, text='Dataset Head (5 rows): ', font=self.__title_font)
         columns, col_width = list(self.__data_set.columns), []
         for col in columns:
@@ -54,9 +54,14 @@ class ModelTrainer:
         self.__data_table.pack(side=TOP, fill='y', expand='yes', padx=5, anchor=W)
 
         # Second section of the page
+        # We have two subframes in the second section. The first is subframe1, the second is subframe2. 
+        # Subframe1 contains all the needed widgts for model building before we click the "confirm model" button. 
+        # Subframe2 will be displayed after we click the "confirm model" button. 
         self.__wrapper2 = LabelFrame(self.__step4_frame, text='Step4: Model Setup', font=self.__title_font)
         self.__subframe1 = Frame(self.__wrapper2, width=1000, height=105)
         self.__subframe1.pack(fill='x', expand='no', padx=10, pady=5)
+        # Two sub-frames in subframe1. The first one sub_subframe1 is for displaying the features. It has a canvas and a corresponding canvas_frame. This is for adding the scrollbar. 
+        # The second one is sub_subframe2 for displaying labels. It also has a canvas2 and a canvas_frame2. 
         self.__sub_subframe1 = Frame(self.__subframe1)
         self.__sub_subframe1.pack(fill="both", expand="yes", padx=10, pady=2)
         self.__sub_subframe2 = Frame(self.__subframe1)
@@ -72,11 +77,13 @@ class ModelTrainer:
         self.__canvas.create_window((0, 0), window=self.__canvas_frame, anchor="nw")
         self.__canvas2.create_window((0, 0), window=self.__canvas_frame2, anchor="nw")
 
+        # Adding the scrollbar for the features section. 
         xScrollBar = ttk.Scrollbar(self.__canvas_frame, orient="horizontal", command=self.__canvas.xview)
         xScrollBar.pack(side=BOTTOM, fill="x")
         self.__canvas.configure(xscrollcommand=xScrollBar.set)
         self.__canvas.bind('<Configure>', lambda e: self.__canvas.configure(scrollregion=self.__canvas.bbox(('all'))))
-
+        
+        # Adding the scrollbar for the label section. 
         xScrollBar2 = ttk.Scrollbar(self.__canvas_frame2, orient="horizontal", command=self.__canvas2.xview)
         xScrollBar2.pack(side=BOTTOM, fill="x")
         self.__canvas2.configure(xscrollcommand=xScrollBar2.set)
@@ -87,6 +94,7 @@ class ModelTrainer:
         self.__check_button_control_list = []
         check_button_list = []
 
+        # A list of check-box for selecting multiples features. 
         for i in range(num_variables):
             control_variable = IntVar()
             control_variable.set(0)
@@ -97,29 +105,36 @@ class ModelTrainer:
                                            text=column_names[i])
             check_button_list.append(check_button)
 
+        # Select features section 
         select_features_label = Label(self.__canvas_frame, text='Select features: ', font=self.__label_font)
         select_features_label.pack(side=LEFT, padx=5, pady=2)
-
+        
+        # Packing the checkboxes.  
         for i in range(num_variables):
             check_button_list[i].pack(side=LEFT, padx=5, pady=2)
 
+        # Select label section 
         select_y_label = Label(self.__canvas_frame2, text='Select label: ', font=self.__label_font)
         select_y_label.pack(side=LEFT, padx=5, pady=2)
         self.__control_label_var = IntVar()
         self.__control_label_var.set(0)
 
+        # Create a list of radio buttons for selecting the label. 
         for i in range(num_variables):
             label_radio_button = Radiobutton(self.__canvas_frame2, value=i + 1, variable=self.__control_label_var,
                                              text=column_names[i])
             data_type = self.__data_set.dtypes[i]
+            # Picking numerical variable as the label choice. 
             if data_type == "int64" or data_type == "float64":
                 label_radio_button.pack(side=LEFT, padx=5, pady=2)
 
+        # Section train/test ratio section 
         select_ratio_label = Label(self.__sub_subframe2, text='Select train/test ratio: ', font=self.__label_font)
         select_ratio_label.grid(row=2, column=0, sticky=W, pady=1)
         ratio = ["1", "2", "3", "4", "5"]
         self.__control_ratio_var = IntVar()
         self.__control_ratio_var.set(0)
+        # Create five ratio button for train/test ratio options.  
         ratio_radio_button1 = Radiobutton(self.__sub_subframe2, value=1, variable=self.__control_ratio_var,
                                           text=ratio[0])
         ratio_radio_button2 = Radiobutton(self.__sub_subframe2, value=2, variable=self.__control_ratio_var,
@@ -130,16 +145,19 @@ class ModelTrainer:
                                           text=ratio[3])
         ratio_radio_button5 = Radiobutton(self.__sub_subframe2, value=5, variable=self.__control_ratio_var,
                                           text=ratio[4])
+        # Configure the layout of ratio buttons. 
         ratio_radio_button1.grid(row=2, column=1)
         ratio_radio_button2.grid(row=2, column=2)
         ratio_radio_button3.grid(row=2, column=3, padx=50)
         ratio_radio_button4.grid(row=2, column=4, padx=60)
         ratio_radio_button5.grid(row=2, column=5, padx=40)
 
+        # Select model section 
         select_model_label = Label(self.__sub_subframe2, text='Select model: ', font=self.__label_font)
         select_model_label.grid(row=3, column=0, sticky=W, pady=1)
         self.__control_model_var = IntVar()
         self.__control_model_var.set(0)
+        # Three machine learning models. 1. Linear Regression 2. Decision Tree Regression. 3. Support Vector Regression.
         model = ["Linear Regression", "Decision Tree Regression", "Support Vector Regression"]
         model_radio_button1 = Radiobutton(self.__sub_subframe2, value=1, variable=self.__control_model_var,
                                           text=model[0])
@@ -171,6 +189,7 @@ class ModelTrainer:
 
     def confirm_model(self):
         try:
+            # In case we click the "confirm model" for more than twice. 
             self.__subframe2.pack_forget()
         except:
             pass
@@ -188,12 +207,13 @@ class ModelTrainer:
         x = self.__data_set.loc[:, features]
         for i in range(len(features)):
             feature_data_type = x.dtypes[i]
+            # Deal with some variables whose data type is string. Here we use the factorize function in pandas to convert it to numerical variable. 
             if feature_data_type != "int64" and feature_data_type != "float64":
                 x[features[i]] = pd.factorize(x[features[i]])[0]
 
         y = self.__data_set.loc[:, colnames[label_var - 1]]
         test_size = 1 / (1 + ratio_var)
-        x_train, x_test, y_train, y_test = train_test_split(x, y, test_size=test_size, random_state=123)
+        x_train, x_test, y_train, y_test = train_test_split(x, y, test_size=test_size, random_state=123) # get the train & test datasets. 
         self.__x_train = x_train
         self.__x_test = x_test
         self.__y_train = y_train
@@ -223,6 +243,7 @@ class ModelTrainer:
                                     font=self.__label_font)
             success_message.pack(side=BOTTOM)
 
+    # Building the decision tree model. In this model, we have to input the maximum tree depth. 
     def confirm_tree_model(self):
         max_depth = self.__max_depth_entry.get()
 
@@ -233,7 +254,7 @@ class ModelTrainer:
         self.__tree_entry_frame = Frame(self.__subframe2)
         self.__tree_entry_frame.pack(fill="x", expand="no", padx=5, pady=2)
         try:
-            if max_depth == "None":
+            if max_depth == "None": # Defaul value. If we didn't enter the maximum tree depth. 
                 tree_model = DecisionTreeRegressor()
             else:
                 depth = int(max_depth)
@@ -258,5 +279,5 @@ class ModelTrainer:
 
     def unpack_frame_previous(self):
         self.__step4_frame.pack_forget()
-        self.__root.geometry('1200x550')  # MAYBE NEEDED TO BE CHANGED
+        self.__root.geometry('1200x550')  
         self.__previous_frame.pack(fill='both')

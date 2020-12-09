@@ -53,14 +53,23 @@ class ModelSummarizer:
         elif type(self.__model).__name__ == "DecisionTreeRegressor":
             model_name = "Decision Tree Regession"
         elif type(self.__model).__name__ == "SVR":
-            model_name = "SVM"
+            model_name = "Support Vector Regression"
 
         model_name_label = Label(self.__wrapper1_left, text="The model we use is " + model_name, font=self.__label_font)
 
         features_list = self.__x_test.columns.values.tolist()
+        flag = False
+        print(str(len(features_list)))
+        if len(features_list) > 5:
+            features_list = features_list[0:5]
+            flag = True
         features_str = ", "
         features_str = features_str.join(features_list)
-        features_label = Label(self.__wrapper1_left, text="We have these features: " + features_str,
+        if flag:
+            features_label_text = "We have these features: " + features_str + "..."
+        else:
+            features_label_text = "We have these features: " + features_str
+        features_label = Label(self.__wrapper1_left, text=features_label_text,
                                font=self.__label_font)
 
         y_label = Label(self.__wrapper1_left, text="The label (y) we use is " + self.__y_test.name,
